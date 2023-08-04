@@ -55,7 +55,7 @@ android {
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
-        manifestPlaceholders = [segmentWriteKey: segmentWriteKey]
+        manifestPlaceholders += [segmentWriteKey: segmentWriteKey]
     }
 
     buildTypes {

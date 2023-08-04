@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:favorite_places_app/models/favorite_place.dart';
+import 'package:favorite_places_app/screens/map_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -48,26 +50,41 @@ class _LocationInputState extends State<LocationInput> {
 
     setState(() {
       isGettingLocation = true;
-    });
+    });     
 
-    LocationData locationData = await location.getLocation();
+    try {     
+      LocationData locationData = await location.getLocation();
+      await sendReqToLocation(locationData.latitude!, locationData.longitude!);
+    } catch (e) {
+      rethrow;
+    }
+  }
 
-    final lat = locationData.latitude;
-    final lng = locationData.longitude;
+  Future<void> selectOnMap() async {
+    final LatLng? pos = await Navigator.of(context).push<LatLng>(MaterialPageRoute(builder: (context) => MapScreen()));
 
+    if (pos == null) {
+      return;
+    }
+
+    sendReqToLocation(pos.latitude, pos.longitude);
+  }
+
+  Future<void> sendReqToLocation(double lat, double lng) async {    
+    
     final uri = Uri.parse(
         "https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=${dotenv.get('API_KEY')}");
-
+    
     final response = await http.get(uri);
     final json = jsonDecode(response.body);
     final address = json['results'][0]['formatted_address'];
-
+    
     setState(() {
       placeLocation =
-          PlaceLocation(latitude: lat!, longitude: lng!, address: address);
+          PlaceLocation(latitude: lat, longitude: lng, address: address);
       isGettingLocation = false;
     });
-
+    
     widget.onLocationSave(placeLocation!);
   }
 
@@ -121,7 +138,7 @@ class _LocationInputState extends State<LocationInput> {
                   style: Theme.of(context).textTheme.titleSmall),
             ),
             TextButton.icon(
-                onPressed: () {},
+                onPressed: selectOnMap,
                 icon: const Icon(Icons.map),
                 label: Text('Select on map',
                     style: Theme.of(context).textTheme.titleSmall)),
