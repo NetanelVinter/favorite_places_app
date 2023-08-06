@@ -8,17 +8,18 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+    return Scaffold(      
+      appBar: AppBar(        
         title: const Text('Favorite Places'),
         actions: [
           IconButton(
               onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => AddPlaceScreen())),
+                  MaterialPageRoute(builder: (context) => const AddPlaceScreen())),
               icon: const Icon(Icons.add))
         ],
       ),
       body: const FavoritePlacesList(),
+      
     );
   }
 }
